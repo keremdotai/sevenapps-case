@@ -3,6 +3,11 @@ name: sevenapps
 services:
   # FastAPI server
   server:
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     build:
       context: ./app
       dockerfile: Dockerfile
@@ -36,9 +41,11 @@ services:
       # Other settings
       - MAX_BODY_SIZE_MB=${MAX_BODY_SIZE_MB}
       - MAX_NUM_THREADS=${MAX_NUM_THREADS}
+    networks:
+      - default
 
   # MongoDB Database
-  database:
+  mongodb:
     image: mongodb/mongodb-community-server:latest
     container_name: mongodb
     restart: always
@@ -50,6 +57,13 @@ services:
       - MONGODB_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}
     volumes:
       - ${MONGODB_VOLUME}:/data/db
+    healthcheck:
+      test: mongosh --eval 'db.adminCommand("ping")'
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - default
     
   # Redis
   redis:
@@ -65,7 +79,7 @@ services:
     volumes:
       - ${REDIS_VOLUME}:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: redis-cli ping
       interval: 10s
       timeout: 5s
       retries: 5
