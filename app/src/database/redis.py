@@ -35,7 +35,7 @@ class RedisClient:
         """
         await self.client.ping()
 
-    async def push(self, key: str, content: dict) -> None:
+    async def push(self, key: str, content: list[dict]) -> None:
         """
         Push content to a list in Redis with the given key.
 
@@ -43,13 +43,17 @@ class RedisClient:
         ----------
         key : str
             The key of the list.
-        """
-        item = json.dumps(content)
-        await self.client.rpush(key, item)
 
-        # Check if the list is too long
-        if await self.length(key) > REDIS_LIST_LIMIT:
-            await self.pop(key)
+        content : list[dict]
+            The content to push to the list.
+        """
+        for item in content:
+            item = json.dumps(item)
+            await self.client.rpush(key, item)
+
+            # Check if the list is too long
+            if await self.length(key) > REDIS_LIST_LIMIT:
+                await self.pop(key)
 
     async def pop(self, key: str) -> None:
         """
