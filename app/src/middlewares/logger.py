@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from typing import Callable
 
 from fastapi import Request, Response, status
@@ -69,7 +70,11 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         }
 
         # Log the incoming request to the database
-        log = request_log | {"level": "info", "detail": "Incoming request."}
+        log = request_log | {
+            "level": "info",
+            "detail": "Incoming request.",
+            "timestamp": datetime.now(),
+        }
         await log_to_database(db, log)
 
         # Run the request
@@ -77,7 +82,12 @@ class LoggerMiddleware(BaseHTTPMiddleware):
             response: Response = await call_next(request)
 
             # Log the response to the database
-            log = request_log | {"level": "info", "detail": "Endpoint returns successfully.", "status_code": response.status_code}
+            log = request_log | {
+                "level": "info",
+                "detail": "Endpoint returns successfully.",
+                "status_code": response.status_code,
+                "timestamp": datetime.now(),
+            }
             await log_to_database(db, log)
 
             return response
@@ -89,6 +99,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
                 "status_code": e.status_code,
                 "detail": e.detail,
                 "traceback": e.trace,
+                "timestamp": datetime.now(),
             }
             await log_to_database(db, log)
 
@@ -105,6 +116,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
                 "status_code": e.status_code,
                 "detail": e.detail,
                 "traceback": e.trace,
+                "timestamp": datetime.now(),
             }
             await log_to_database(db, log)
 
