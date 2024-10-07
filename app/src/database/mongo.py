@@ -2,7 +2,7 @@ import os
 from bson import ObjectId
 
 from motor.motor_asyncio import AsyncIOMotorClient
-from pymongo.server_api import ServerApi
+# from pymongo.server_api import ServerApi
 
 # Environment variable/s
 MONGODB_HOST = os.getenv("MONGODB_HOST", None)
@@ -37,8 +37,12 @@ class MongoClient:
         logs : AsyncIOMotorCollection
             The collection for logs.
         """
-        uri = f"mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_HOST}:27017"
-        self.client = AsyncIOMotorClient(uri, server_api=ServerApi("1"))
+        self.client = AsyncIOMotorClient(
+            host=MONGODB_HOST,
+            port=27017,
+            username=MONGODB_USERNAME,
+            password=MONGODB_PASSWORD,
+        )
 
         # Database
         self.db = self.client["sevenapss-case"]
