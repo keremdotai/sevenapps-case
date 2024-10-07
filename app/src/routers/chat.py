@@ -10,7 +10,7 @@ from ..utils import CustomHTTPException
 router = APIRouter()
 
 
-@router.post("/v1/pdf/{pdf_id}")
+@router.post("/v1/chat/{pdf_id}")
 async def chat_about_pdf(request: Request, pdf_id: str) -> JSONResponse:
     """
     This endpoint is used to chat with the bot using the uploaded PDF file.
@@ -32,7 +32,7 @@ async def chat_about_pdf(request: Request, pdf_id: str) -> JSONResponse:
 
     # Find the PDF in the database
     try:
-        pdf = db.find_pdf(pdf_id)
+        pdf = await db.find_pdf(pdf_id)
     except Exception as e:
         raise CustomHTTPException(
             exception=e,
@@ -43,19 +43,19 @@ async def chat_about_pdf(request: Request, pdf_id: str) -> JSONResponse:
     # Chat with the bot using the message, text, metadata, and history
     try:
         # Get the chat history from Redis
-        history = cache.get(pdf_id)
+        history = await cache.get(pdf_id)
 
         # Create chat session
         chat = client.chat(pdf["metadata"], pdf["text"], history)
 
         # Send the message to the bot
         response = []
-        async for part in chat.send_message_async(message, stream=True):
-            response.append(part["content"])
+        async for part in await chat.send_message_async(message, stream=True):
+            response.append(part.candidates[0].content.parts[0].text)
         response = "".join(response)
 
         # Update the chat history in Redis
-        cache.push(
+        await cache.push(
             pdf_id,
             [
                 {"role": "user", "parts": message},
