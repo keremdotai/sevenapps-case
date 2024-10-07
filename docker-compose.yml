@@ -1,0 +1,79 @@
+name: sevenapps
+
+services:
+  # FastAPI server
+  server:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+      args:
+        - PORT=${SERVER_PORT}
+    container_name: server
+    restart: unless-stopped
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    environment:
+      # Server settings
+      - PORT=${SERVER_PORT}
+      - NUM_WORKERS=${SERVER_NUM_WORKERS}
+      # Logging settings
+      - LOGGER_USE_COLORS=${LOGGER_USE_COLORS}
+      - LOGGER_ENDPOINT_FILTERS=${LOGGER_ENDPOINT_FILTERS}
+      - LOGGER_STATUS_FILTERS=${LOGGER_STATUS_FILTERS}
+      - LOGGER_SUSPENDED_PACKAGES=${LOGGER_SUSPENDED_PACKAGES}
+      - LOGGER_PATH=${LOGGER_PATH}
+      # Gemini API settings
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL_NAME=${GEMINI_MODEL_NAME}
+      # MongoDB settings
+      - MONGODB_USERNAME=${MONGODB_USERNAME}
+      - MONGODB_PASSWORD=${MONGODB_PASSWORD}
+      - MONGODB_HOST=${MONGODB_HOST}
+      # Redis settings
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_LIST_LIMIT=${REDIS_LIST_LIMIT}
+      # Other settings
+      - MAX_BODY_SIZE_MB=${MAX_BODY_SIZE_MB}
+      - MAX_NUM_THREADS=${MAX_NUM_THREADS}
+
+  # MongoDB Database
+  database:
+    image: mongodb/mongodb-community-server:latest
+    container_name: mongodb
+    restart: always
+    attach: false
+    ports:
+      - ${MONGODB_PORT}:27017
+    environment:
+      - MONGODB_INITDB_ROOT_USERNAME=${MONGODB_USERNAME}
+      - MONGODB_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}
+    volumes:
+      - ${MONGODB_VOLUME}:/data/db
+    
+  # Redis
+  redis:
+    image: redis:7.4-alpine
+    container_name: redis
+    restart: always
+    attach: false
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - ${REDIS_PORT}:6379
+    volumes:
+      - ${REDIS_VOLUME}:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - default
+
+
+# Networks
+networks:
+  default:
+    driver: bridge
