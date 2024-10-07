@@ -54,8 +54,6 @@ async def chat_about_pdf(request: Request, pdf_id: str) -> JSONResponse:
             response.append(part["content"])
         response = "".join(response)
 
-        print(f"Response : {response}")
-
         # Update the chat history in Redis
         cache.push(
             pdf_id,
