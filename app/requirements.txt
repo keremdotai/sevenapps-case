@@ -17,3 +17,5 @@ httpx==0.27.*
 google-generativeai==0.8.*
 # PDF parsing
 PyMuPDF==1.24.10
+# NLP tools
+langdetect==1.0.9
