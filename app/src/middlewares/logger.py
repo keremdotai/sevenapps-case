@@ -10,7 +10,7 @@ from ..logger import LOGGER
 from ..utils import CustomHTTPException
 
 
-def log_to_database(db: MongoClient, log: dict) -> None:
+async def log_to_database(db: MongoClient, log: dict) -> None:
     """
     Log a request with its details to the database.
     If the logging fails, it logs an error message with the log content.
@@ -24,7 +24,7 @@ def log_to_database(db: MongoClient, log: dict) -> None:
         The log dictionary.
     """
     try:
-        db.logs.insert_one(log)
+        await db.insert_log(log)
     except:
         LOGGER.error(f"FAIL TO LOG : {json.dumps(log)}")
 
@@ -70,7 +70,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
 
         # Log the incoming request to the database
         log = request_log | {"level": "info", "detail": "Incoming request."}
-        log_to_database(db, log)
+        await log_to_database(db, log)
 
         # Run the request
         try:
@@ -78,7 +78,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
 
             # Log the response to the database
             log = request_log | {"level": "info", "detail": "Endpoint returns successfully.", "status_code": response.status_code}
-            log_to_database(db, log)
+            await log_to_database(db, log)
 
             return response
         # Catch the HTTP exception
@@ -90,7 +90,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
                 "detail": e.detail,
                 "traceback": e.trace,
             }
-            log_to_database(db, log)
+            await log_to_database(db, log)
 
             return JSONResponse(
                 status_code=e.status_code,
@@ -106,7 +106,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
                 "detail": e.detail,
                 "traceback": e.trace,
             }
-            log_to_database(db, log)
+            await log_to_database(db, log)
 
             return JSONResponse(
                 status_code=e.status_code,
