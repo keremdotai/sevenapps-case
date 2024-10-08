@@ -2,6 +2,7 @@
 # Ignore all files with the given r-patterns, file extensions, file names, and directories
 .vscode/
 .DS_Store
+app/tests/results
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
