@@ -254,3 +254,39 @@ curl -X POST "http://localhost:8000/v1/chat/{pdf_id}" \
 
 ## Testing
 
+> [!WARNING]
+>
+> The program is written with **Python 3.11**.
+> Please create a virtual environment in Python 3.11 before stepping into the next steps.
+>
+
+> [!IMPORTANT]
+>
+> Before running the tests, you must install the requirements given in `app/requirements.txt`
+> and `python-dotenv` package. You can install the requirements with the following lines:
+>
+> ```bash
+> python -m pip install -r app/requirements.txt
+> python -m pip install python-dotenv
+> ```
+>
+
+Test cases are provided inside `app/tests` folder. You can run all tests together with the following command:
+
+```bash
+python app/tests --all
+```
+
+If you want to run specific test cases, you can only run them with the following command:
+
+```bash
+python app/tests name_of_case_1 name_of_case_2 ...
+```
+You can call test cases individually with the names below:
+
+- utils
+- nlp
+- database
+- routers
+
+The test results are written in JSON format to `app/tests/results` folder.
