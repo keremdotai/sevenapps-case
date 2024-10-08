@@ -11,6 +11,8 @@ REDIS_LIST_LIMIT = int(os.getenv("REDIS_LIST_LIMIT", 30))
 if REDIS_HOST is None or REDIS_PASSWORD is None:
     raise ValueError("Redis environment variables are not set.")
 
+DEV_MODE = os.getenv("DEV_MODE", "false").lower() == "true"
+
 
 class RedisClient:
     """
@@ -21,7 +23,11 @@ class RedisClient:
         """
         Constructor method for `RedisClient`.
         """
-        self.client = redis.Redis(host=REDIS_HOST, password=REDIS_PASSWORD)
+        self.client = redis.Redis(
+            host=REDIS_HOST if not DEV_MODE else "localhost",
+            port=6379 if not DEV_MODE else int(os.getenv("REDIS_PORT", 6379)),
+            password=REDIS_PASSWORD,
+        )
 
     async def close(self) -> None:
         """

@@ -21,9 +21,9 @@ def clean_text(text: str) -> str:
     cleaned_text : str
         The cleaned text.
     """
+    text = re.sub(r"-\n", "", text)  # Remove hyphenated line breaks
     text = re.sub(r"\n+", "\n", text)  # Remove extra newlines
     text = re.sub(r"\s+", " ", text)  # Remove extra spaces
-    text = re.sub(r"-\n", "", text)  # Remove hyphenated line breaks
     text = re.sub(r"[^\x00-\x7F]+", "", text)  # Remove non-ASCII characters
 
     return text.strip()

@@ -2,6 +2,7 @@ import os
 from bson import ObjectId
 
 from motor.motor_asyncio import AsyncIOMotorClient
+
 # from pymongo.server_api import ServerApi
 
 # Environment variable/s
@@ -11,6 +12,8 @@ MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD", None)
 
 if MONGODB_HOST is None or MONGODB_USERNAME is None or MONGODB_PASSWORD is None:
     raise ValueError("MongoDB environment variables are not set.")
+
+DEV_MODE = os.getenv("DEV_MODE", "false").lower() == "true"
 
 
 class MongoClient:
@@ -38,8 +41,8 @@ class MongoClient:
             The collection for logs.
         """
         self.client = AsyncIOMotorClient(
-            host=MONGODB_HOST,
-            port=27017,
+            host=MONGODB_HOST if not DEV_MODE else "localhost",
+            port=27017 if not DEV_MODE else int(os.getenv("MONGODB_PORT", 27017)),
             username=MONGODB_USERNAME,
             password=MONGODB_PASSWORD,
         )

@@ -41,6 +41,11 @@ async def upload_pdf(request: Request) -> JSONResponse:
         async for chunk in request.stream():
             validator.chunk(chunk)
             parser.data_received(chunk)
+
+        # Get the filename
+        filename = file.multipart_filename
+        if filename is None or not filename.endswith(".pdf"):
+            raise Exception("Invalid file format")
     # Handle client disconnect
     except ClientDisconnect as e:
         raise CustomHTTPException(
@@ -62,9 +67,6 @@ async def upload_pdf(request: Request) -> JSONResponse:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid file data",
         )
-
-    # Get the filename
-    filename = file.multipart_filename
 
     # Parse the PDF file
     try:
