@@ -258,6 +258,7 @@ curl -X POST "http://localhost:8000/v1/chat/{pdf_id}" \
 >
 > The program is written with **Python 3.11**.
 > Please create a virtual environment in Python 3.11 before stepping into the next steps.
+> Besides, for database and router tests, there must be Docker engine to run.
 >
 
 > [!IMPORTANT]
